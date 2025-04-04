@@ -1,5 +1,5 @@
 import axios from "axios";
-import { authService } from "./authService";
+import { authService, User } from "./authService";
 
 const API_URL = "http://localhost:8000/api/messages";
 
@@ -11,6 +11,7 @@ export interface Message {
     id: string;
     email: string;
   };
+  likedBy: User[];
 }
 
 export interface CreateMessageDto {
@@ -30,7 +31,7 @@ export const messageService = {
 
   async findAll(): Promise<Message[]> {
     const response = await axios.get(API_URL);
-    console.log(response.data);
+    // console.log(response.data);
     return response.data;
   },
 

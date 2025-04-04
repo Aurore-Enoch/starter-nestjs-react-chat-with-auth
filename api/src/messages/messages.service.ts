@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Message } from './entities/message.entity';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UsersService } from '../users/users.service';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class MessagesService {
@@ -11,6 +12,8 @@ export class MessagesService {
     @InjectRepository(Message)
     private messagesRepository: Repository<Message>,
     private usersService: UsersService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async create(
@@ -28,7 +31,7 @@ export class MessagesService {
 
   findAll(): Promise<Message[]> {
     return this.messagesRepository.find({
-      relations: ['user'],
+      relations: ['user', 'likedBy'],
       order: {
         createdAt: 'ASC',
       },
@@ -56,5 +59,41 @@ export class MessagesService {
 
   async remove(id: string): Promise<void> {
     await this.messagesRepository.softDelete(id);
+  }
+
+  async likeMessage(userId: string, messageId: string): Promise<Message> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    const message = await this.messagesRepository.findOne({
+      where: { id: messageId },
+      relations: ['likedBy', 'user'],
+    });
+
+    if (!user || !message) {
+      throw new Error('User or Message not found');
+    }
+
+    if (!message.likedBy.some((u) => u.id === user.id)) {
+      message.likedBy.push(user);
+      await this.messagesRepository.save(message);
+    }
+
+    return message;
+  }
+
+  async unlikeMessage(userId: string, messageId: string): Promise<Message> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    const message = await this.messagesRepository.findOne({
+      where: { id: messageId },
+      relations: ['likedBy', 'user'],
+    });
+
+    if (!user || !message) {
+      throw new Error('User or Message not found');
+    }
+
+    message.likedBy = message.likedBy.filter((u) => u.id !== user.id);
+    await this.messagesRepository.save(message);
+
+    return message;
   }
 }

@@ -6,6 +6,9 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
@@ -20,12 +23,17 @@ export class Message {
   @ManyToOne(() => User, (user) => user.messages)
   user: User;
 
-  @CreateDateColumn()
+  @ManyToMany(() => User, (user) => user.likedMessages)
+  @JoinTable()
+  likedBy: User[];
+
+  @CreateDateColumn({type: 'timestamptz'})
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({type: 'timestamptz'})
   updatedAt: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({type: 'timestamptz'})
   deletedAt: Date;
+  
 }

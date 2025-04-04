@@ -6,6 +6,7 @@ import {
   CreateMessageDto,
 } from "../../services/messageService";
 import { SendHorizontal } from "lucide-react";
+import { useSocket } from "@/contexts/SocketProvider";
 
 const MessageForm: React.FC = () => {
   const { register, handleSubmit, reset, watch } = useForm<CreateMessageDto>();
@@ -13,17 +14,26 @@ const MessageForm: React.FC = () => {
   const messageText = watch("text", "");
 
   const allowToSend = messageText.trim() !== "";
+      const socket = useSocket();
+  
+
 
   const mutation = useMutation({
     mutationFn: (data: CreateMessageDto) => messageService.create(data),
     onSuccess: () => {
+
+      if(socket) {
+        console.log("Socket is connected", socket);
+        socket.emit("sendMessageFromFront", {text: messageText});
+        
+      }
       queryClient.invalidateQueries({ queryKey: ["messages"] });
       reset();
     },
   });
 
   const onSubmit = (data: CreateMessageDto) => {
-    mutation.mutate(data);
+      mutation.mutate(data);
   };
 
   return (
@@ -33,7 +43,7 @@ const MessageForm: React.FC = () => {
           {...register("text", { required: true })}
           type="text"
           placeholder="Type your message..."
-          className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 bg-pink-50"
         />
 
         <button

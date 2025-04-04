@@ -2,7 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { Button } from "../ui/button";
-import { LogIn } from "lucide-react";
+import { LogIn, User } from "lucide-react";
+
 
 const UserInfo: React.FC = () => {
   const { user } = useAuth();
@@ -23,8 +24,8 @@ const UserInfo: React.FC = () => {
   return (
     <div className="flex items-center gap-3">
       <div className="relative">
-        <div className="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-semibold">
-          {user.email[0].toUpperCase()}
+        <div className="h-10 w-10 rounded-full bg-pink-500 flex items-center justify-center text-white font-semibold">
+          <User className="w-6 h-6" />
         </div>
         <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white"></div>
       </div>
